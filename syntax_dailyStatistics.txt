@@ -1,0 +1,9 @@
+N of lines (32-bit integer)
+
+line syntax (everything on one line, separated by comma):
+
+Daily Statistics ID (32-bit integer), 
+Plant ID (32-bit integer), 
+daily producton (32-bit float),
+average sales price of 1 MWh (32-bit float)
+date (32-bit UNIX time epoch)

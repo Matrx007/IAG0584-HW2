@@ -1,0 +1,9 @@
+N of lines (32-bit integer)
+
+line syntax (everything on one line, separated by comma):
+
+Plant ID (32-bit integer), 
+plant name (inside double quotes, special symbols escaped, can't contain \0), 
+plant type (inside double quotes),
+maximum rated capacity (32-bit float),
+average cost to produce 1 MWh (32-bit float)

@@ -7,6 +7,8 @@
 #include <memory.h>
 
 #include "parsing.h"
+#include "memory.h"
+#include "memory.c"
 #include "parsing.c"
 #include "fs.c"
 
@@ -34,18 +36,9 @@ struct DailyStatisticsRow   **dailyReports;
 int n_powerPlants = 0;
 int n_dailyStatistics = 0;
 
-/* 
-
-    ### File parsing ###
-
-
-
-
-
-        
-        
-
- */
+// ####################
+// ### FILE PARSING ###
+// ####################
 
 uint8_t __readDatabaseString(const char **c, char buffer[], char **o) {
     // If field doesn't start with double quotes
@@ -135,23 +128,7 @@ uint8_t __readDatabaseFloat(const char **c, char buffer[], char **o) {
 
     return 1;
 }
-// TODO: Store until null terminator
-const char* copyBufferToHeap(char buffer[], size_t buffer_size) {
-    char *c = malloc(sizeof(char) * buffer_size);
 
-    memcpy(c, buffer, sizeof(char) * buffer_size);
-
-    return (const char *) c;
-}
-
-const char* copyStringToHeap(char buffer[]) {
-    unsigned long bytes = strlen(buffer) + 1;
-    char *c = malloc(sizeof(char) * bytes);
-
-    memcpy(c, buffer, sizeof(char) * bytes);
-
-    return (const char *) c;
-}
 
 struct PowerPlantsRow* __loadPowerPlantDatabaseFileLine(const char **c) {
     struct PowerPlantsRow *row = malloc(sizeof(struct PowerPlantsRow));
@@ -231,17 +208,34 @@ uint8_t loadPowerPlantDatabaseFile(const char *raw) {
     }
 
     int i = 0;
+
+    int line = 1;
     
     do {
-        space(&c);
+        line++;
+        trim(&c);
         
         // If end-of-file
         if(*c == 0) break;
 
         struct PowerPlantsRow* row = __loadPowerPlantDatabaseFileLine(&c);
-        if(row == 0) return 0;
+        if(row == 0) {
+            printf("problem on line %d\n", line);
 
-        powerPlants[i++] = row;
+            // Skip this line
+            while(*c != '\n') c++;
+            continue;
+        }
+
+        if(powerPlants[row->plantID] != 0) {
+            printf("duplicate PK %d on line %d\n", row->plantID, line);
+
+            // Skip this line
+            while(*c != '\n') c++;
+            continue;
+        }
+
+        powerPlants[row->plantID] = row;
 
         space(&c);
     } while(*c == '\n');
@@ -249,16 +243,15 @@ uint8_t loadPowerPlantDatabaseFile(const char *raw) {
     return 1;
 }
 
-int main(int argc, const char *args[]) {
+int __main(int argc, const char *args[]) {
     int r = loadPowerPlantDatabaseFile(readEntireFile(args[1]));
+    printf("================\n");
     printf("return code: %d\n", r);
 
     for (int i = 0; i < n_powerPlants; i++) {
         struct PowerPlantsRow *row = powerPlants[i];
         
-        // break isntead of continue because once there's a null 
-        // pointer, everything after that will be too
-        if(row == 0) break;
+        if(row == 0) continue;
 
         printf("power plant no %d:\n", i);
 

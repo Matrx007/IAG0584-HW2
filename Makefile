@@ -1,15 +1,24 @@
-CXX = gcc
-CXXFLAGS = -Wall -g
-LDFLAGS = 
+#compiler name
+cc :=gcc
 
-SRC = src/
-OBJ = $(SRC:.c=.o)
-EXEC = main
+#remove command
+RM := rm -rf
 
-all: $(EXEC)
+#source files
+SOURCES :=database.c fs.c parsing.c
+SRCS :=$(addprefix src/,$(SOURCES))
 
-$(EXEC): $(OBJ)
-	$(CXX) $(LDFLAGS) -o $@ $(OBJ) $(LBLIBS)
+#object files
+OBJS :=$(addprefix build/,$(SOURCES:.c=.o))
 
+#main target
+main: $(OBJS)
+    $(CC) $^ -o $@
+
+%.o: %.c
+    $(CC) -c $< -o $@
+ 
+
+.PHONY: clean
 clean:
-	rm -rf $(OBJ) $(EXEC)
+    $(RM) *.o main

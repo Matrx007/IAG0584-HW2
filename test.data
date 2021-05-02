@@ -1,8 +1,9 @@
-3
 0,"plant a","coal",1.0,2.3
 1,plant x","magic",11.0,21.3
 1,"plant z","magicfdg",1.1.0,21.3
 1,"plant b","diesel",3.0,4.3
 a,
 2,"plant c","oil",5.0,5.3
+-3,"plant o","solar energy",1.0,0.3
+10,"plant w","hydrogen",50.0,50.3
 

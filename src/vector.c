@@ -1,4 +1,5 @@
 #include <features.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,7 +13,7 @@ struct Vector {
     void *__data;
 };
 
-struct Vector createVector(int unitSize) {
+struct Vector vectorCreate(int unitSize) {
     struct Vector vector;
 
     vector.__unitSize = unitSize;
@@ -25,7 +26,7 @@ struct Vector createVector(int unitSize) {
     return vector;
 }
 
-struct Vector createVectorAdv(int unitSize, int initialSize, float growthRate) {
+struct Vector vectorCreateAdv(int unitSize, int initialSize, float growthRate) {
     struct Vector vector;
 
     vector.__unitSize = unitSize;
@@ -38,8 +39,7 @@ struct Vector createVectorAdv(int unitSize, int initialSize, float growthRate) {
     return vector;
 }
 
-void __growVector(struct Vector *vector) {
-    printf("expanding array\n");
+void __vectorGrow(struct Vector *vector) {
     if(vector->__actualSize == 0) {
         printf("Array size is zero\n");
         abort();
@@ -55,7 +55,7 @@ void __growVector(struct Vector *vector) {
     }
 }
 
-void pack(struct Vector *vector) {
+void vectorPack(struct Vector *vector) {
     vector->__actualSize = vector->size;
     
     vector->__data = realloc(vector->__data, vector->__actualSize * vector->__unitSize);
@@ -66,9 +66,9 @@ void pack(struct Vector *vector) {
     }
 }
 
-int addElement(struct Vector *vector, void *data) {
+int vectorAdd(struct Vector *vector, void *data) {
     if(vector->size >= vector->__actualSize) {
-        __growVector(vector);
+        __vectorGrow(vector);
     }
 
     int index = vector->size;
@@ -81,7 +81,7 @@ int addElement(struct Vector *vector, void *data) {
     return index;
 }
 
-void removeElement(struct Vector *vector, int index) {
+void vectorRemove(struct Vector *vector, int index) {
     if(index < 0 || index >= vector->size) {
         printf("Array index out of bounds\n");
         abort();
@@ -94,7 +94,7 @@ void removeElement(struct Vector *vector, int index) {
     vector->size--;
 }
 
-void changeElement(struct Vector *vector, int index, void *data) {
+void vectorChange(struct Vector *vector, int index, void *data) {
     if(index < 0 || index >= vector->size) {
         printf("Array index out of bounds\n");
         abort();
@@ -105,7 +105,7 @@ void changeElement(struct Vector *vector, int index, void *data) {
     memcpy(dest, data, vector->__unitSize);
 }
 
-void* getElement(struct Vector *vector, int index) {
+void* vectorGet(struct Vector *vector, int index) {
     if(index < 0 || index >= vector->size) {
         printf("Array index out of bounds\n");
         abort();
@@ -114,47 +114,78 @@ void* getElement(struct Vector *vector, int index) {
     return vector->__data + index * vector->__unitSize;
 }
 
-int __main(int argc, char **args) {
-    struct Vector vector = createVector(sizeof(int));
+// matcher(..) has to return either 1 or 0
+uint8_t vectorHasMatch(struct Vector *vector, uint8_t (*matcher)(void* data, void* args), void* args) {
+
+    int result;
+    for(int i = 0; i < vector->size; i++) {
+        result = matcher(vectorGet(vector, i), args);
+        if(result) return 1;
+    }
+
+    return 0;
+}
+
+// matcher(..) has to return either 1 or 0
+int vectorCountMatches(struct Vector *vector, uint8_t (*matcher)(void* data, void* args), void* args) {
+
+    int matches = 0;
+    for(int i = 0; i < vector->size; i++) {
+        matches += matcher(vectorGet(vector, i), args);
+    }
+
+    return matches;
+}
+
+void vectorForEach(struct Vector *vector, void (*action)(void* data, void* args), void* args) {
+
+    for(int i = 0; i < vector->size; i++) {
+        action(vectorGet(vector, i), args);
+    }
+}
+
+int vector_test(int argc, char **args) {
+    struct Vector vector = vectorCreate(sizeof(int));
 
     int tmp;
     tmp = 5;
-    addElement(&vector, &tmp);
+    vectorAdd(&vector, &tmp);
     tmp = 8;
-    addElement(&vector, &tmp);
+    vectorAdd(&vector, &tmp);
     tmp = 7;
-    addElement(&vector, &tmp);
+    vectorAdd(&vector, &tmp);
     tmp = 3;
-    addElement(&vector, &tmp);
+    vectorAdd(&vector, &tmp);
 
     printf("%d\n", vector.size);
 
-    removeElement(&vector, 0);
+    vectorRemove(&vector, 0);
     tmp = 13;
-    addElement(&vector, &tmp);
+    vectorAdd(&vector, &tmp);
 
     printf("%d\n", vector.size);
-    printf("%d\n", *(int*)getElement(&vector, 2));
+    printf("%d\n", *(int*)vectorGet(&vector, 2));
 
     tmp = 10;
-    changeElement(&vector, 2, &tmp);
+    vectorChange(&vector, 2, &tmp);
 
     printf("%d\n", vector.size);
-    printf("%s\n", (const char*) getElement(&vector, 2));
 
     printf("actual size: %d\n", vector.__actualSize);
 
     tmp = 69;
-    addElement(&vector, &tmp);
+    vectorAdd(&vector, &tmp);
     tmp = 42;
-    addElement(&vector, &tmp);
+    vectorAdd(&vector, &tmp);
 
-    removeElement(&vector, vector.size-1);
-    removeElement(&vector, vector.size-1);
+    vectorRemove(&vector, vector.size-1);
+    vectorRemove(&vector, vector.size-1);
     
     printf("actual size before: %d\n", vector.__actualSize);
 
-    pack(&vector);
+    vectorPack(&vector);
 
     printf("actual size after: %d\n", vector.__actualSize);
+
+    return 0;
 }

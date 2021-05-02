@@ -10,8 +10,6 @@
 #include "memory.h"
 #include "memory.c"
 #include "parsing.c"
-#include "vector.c"
-#include "table.c"
 #include "fs.c"
 
 struct PowerPlantsRow {
@@ -29,6 +27,14 @@ struct DailyStatisticsRow {
     float avgSalesPrice;
     uint32_t dateEpoch;
 };
+
+// These will be populated while parsing database files
+struct PowerPlantsRow       **powerPlants;
+struct DailyStatisticsRow   **dailyReports;
+
+// These will be incremented while parsing database files
+int n_powerPlants = 0;
+int n_dailyStatistics = 0;
 
 // ####################
 // ### FILE PARSING ###
@@ -185,15 +191,26 @@ struct PowerPlantsRow* __loadPowerPlantDatabaseFileLine(const char **c) {
     return row;    
 }
 
-uint8_t __powerPlantIDMatcher(void* data, void* args) {
-    return ((struct PowerPlantsRow*) data)->plantID == *(u_int32_t*)args;
-}
-
-uint8_t loadPowerPlantDatabaseFile(struct Table *powerPlants, const char *raw) {
+uint8_t loadPowerPlantDatabaseFile(const char *raw) {
     const char *c = raw;
+    
+    trim(&c);
+
+    char buffer[256];
+    // aka output: points to current character in buffer
+    char *o;
+    if(!__readDatabaseInteger(&c, buffer, &o)) return 0;
+    n_powerPlants = atoi(buffer);
+
+    powerPlants = calloc(n_powerPlants, sizeof(struct PowerPlantsRow*));
+    if(powerPlants == 0) {
+        return 0;
+    }
 
     int i = 0;
-    int line = 0;
+
+    int line = 1;
+    
     do {
         line++;
         trim(&c);
@@ -210,15 +227,7 @@ uint8_t loadPowerPlantDatabaseFile(struct Table *powerPlants, const char *raw) {
             continue;
         }
 
-        if(row->plantID == 0) {
-            printf("power plant's PK can't be 0, skipping line %d\n", line);
-
-            // Skip this line
-            while(*c != '\n') c++;
-            continue;
-        }
-
-        if(tableHasMatch(powerPlants, __powerPlantIDMatcher, (void*)&row->plantID)) {
+        if(powerPlants[row->plantID] != 0) {
             printf("duplicate PK %d on line %d\n", row->plantID, line);
 
             // Skip this line
@@ -226,10 +235,7 @@ uint8_t loadPowerPlantDatabaseFile(struct Table *powerPlants, const char *raw) {
             continue;
         }
 
-
-        tableInsert(powerPlants, row->plantID, row);
-
-        free(row);
+        powerPlants[row->plantID] = row;
 
         space(&c);
     } while(*c == '\n');
@@ -237,22 +243,17 @@ uint8_t loadPowerPlantDatabaseFile(struct Table *powerPlants, const char *raw) {
     return 1;
 }
 
-int main(int argc, const char *args[]) {
-    struct Table table = tableCreate(sizeof(struct PowerPlantsRow));
-    int r = loadPowerPlantDatabaseFile(&table, readEntireFile(args[1]));
+int database_test_old(int argc, const char *args[]) {
+    int r = loadPowerPlantDatabaseFile(readEntireFile(args[1]));
     printf("================\n");
     printf("return code: %d\n", r);
 
-
-    for (int i = 0; i < table.size; i++) {
-        struct PowerPlantsRow *row = (struct PowerPlantsRow*)tableGet(&table, i);
+    for (int i = 0; i < n_powerPlants; i++) {
+        struct PowerPlantsRow *row = powerPlants[i];
         
-        if(row->plantID == 0) {
-            printf("\nno power plant #%d\n", i);
-            continue;
-        }
+        if(row == 0) continue;
 
-        printf("\npower plant #%d:\n", i);
+        printf("power plant no %d:\n", i);
 
         printf("plant ID: %d\n", row->plantID);
         printf("plant name: %s\n", row->plantName);
@@ -260,6 +261,4 @@ int main(int argc, const char *args[]) {
         printf("max rated capacity: %f\n", row->maxRatedCapacity);
         printf("avg production cost: %f\n", row->avgProductionCost);
     }
-
-    return 0;
 }

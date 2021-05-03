@@ -4,6 +4,17 @@
 #include <stdlib.h>
 #include <string.h>
 
+struct Vector vectorCreate(int unitSize);
+struct Vector vectorCreateAdv(int unitSize, int initialSize, float growthRate);
+void __vectorGrow(struct Vector *vector);
+void vectorPack(struct Vector *vector);
+int vectorAdd(struct Vector *vector, void *data);
+void vectorRemove(struct Vector *vector, int index);
+void vectorChange(struct Vector *vector, int index, void *data);
+void* vectorGet(struct Vector *vector, int index);
+uint8_t vectorHasMatch(struct Vector *vector, uint8_t (*matcher)(void* data, void* args), void* args);
+int vectorCountMatches(struct Vector *vector, uint8_t (*matcher)(void* data, void* args), void* args);
+void vectorForEach(struct Vector *vector, void (*action)(void* data, void* args), void* args);
 
 struct Vector {
     int __actualSize;

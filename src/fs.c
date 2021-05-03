@@ -4,6 +4,11 @@
 char* readEntireFile(const char* name) {
 
     FILE *file = fopen(name, "rb");
+    
+    if(file == 0) {
+        printf("file doesnt' exist\n");
+        return 0;
+    }
 
     // Find file size
     fseek(file, 0, SEEK_END);

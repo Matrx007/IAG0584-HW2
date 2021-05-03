@@ -9,10 +9,17 @@
 #include "parsing.h"
 #include "memory.h"
 #include "memory.c"
-#include "parsing.c"
 #include "vector.c"
 #include "table.c"
 #include "fs.c"
+#include "csv.c"
+
+uint8_t __readDatabaseString(const char **c, char buffer[], char **o);
+uint8_t __readDatabaseInteger(const char **c, char buffer[], char **o);
+uint8_t __readDatabaseFloat(const char **c, char buffer[], char **o);
+struct PowerPlantsRow* __loadPowerPlantDatabaseFileLine(const char **c);
+uint8_t __powerPlantIDMatcher(void* data, void* args);
+uint8_t loadPowerPlantDatabaseFile(struct Table *powerPlants, const char *raw);
 
 struct PowerPlantsRow {
     uint32_t plantID;
@@ -34,95 +41,6 @@ struct DailyStatisticsRow {
 // ### FILE PARSING ###
 // ####################
 
-uint8_t __readDatabaseString(const char **c, char buffer[], char **o) {
-    // If field doesn't start with double quotes
-    if(**c != '"') {
-        return 0;
-    }
-
-    nextChar(c);
-
-    *o = buffer;
-    while(*o-buffer < 255 && **c != 0 && **c != '"') {
-        if(**c == '\\') {
-            (*c)++;
-            if(**c == '"') {
-                **o = **c;
-                (*o)++;
-            } else {
-                (*c)--;
-                **o = **c;
-            }
-        } else {
-            **o = **c;
-            (*o)++;
-        }
-        (*c)++;
-    }
-
-    // Add null-termiantor
-    **o = 0;
-
-    // If no closing double quotes
-    if(!eat(c, '"')) {
-        return 0;
-    }
-
-    return 1;
-}
-
-uint8_t __readDatabaseInteger(const char **c, char buffer[], char **o) {
-
-    // If field doesn't start with a number
-    if(**c < '0' || **c > '9') {
-        return 0;
-    }
-
-    *o = buffer;
-    while(*o-buffer < 255 && **c != 0 && (**c >= '0' && **c <= '9')) {
-        **o = **c;
-        (*o)++;
-        (*c)++;
-    }
-
-    // Add null-termiantor
-    **o = 0;
-
-    return 1;
-}
-
-uint8_t __readDatabaseFloat(const char **c, char buffer[], char **o) {
-
-    // If field doesn't start with a number
-    if(**c < '0' || **c > '9') {
-        return 0;
-    }
-
-    *o = buffer;
-    while(*o-buffer < 255 && **c != 0 && (**c >= '0' && **c <= '9')) {
-        **o = **c;
-        (*o)++;
-        (*c)++;
-    }
-
-    // Read decimal places
-    if(**c == '.') {
-        **o = '.';
-        (*o)++;
-        (*c)++;
-        while(*o-buffer < 255 && **c != 0 && (**c >= '0' && **c <= '9')) {
-            **o = **c;
-            (*o)++;
-            (*c)++;
-        }
-    }
-
-    // Add null-termiantor
-    **o = 0;
-
-    return 1;
-}
-
 
 struct PowerPlantsRow* __loadPowerPlantDatabaseFileLine(const char **c) {
     struct PowerPlantsRow *row = malloc(sizeof(struct PowerPlantsRow));
@@ -134,6 +52,7 @@ struct PowerPlantsRow* __loadPowerPlantDatabaseFileLine(const char **c) {
     char *o;
 
     // ### Plant ID ###
+    space(c);
 
     if(!__readDatabaseInteger(c, buffer, &o)) return 0;
 
@@ -145,6 +64,7 @@ struct PowerPlantsRow* __loadPowerPlantDatabaseFileLine(const char **c) {
     }
 
     // ### Plant name ###
+    space(c);
     
     if(!__readDatabaseString(c, buffer, &o)) return 0;
 
@@ -156,6 +76,7 @@ struct PowerPlantsRow* __loadPowerPlantDatabaseFileLine(const char **c) {
     }
 
     // ### Plant type ###
+    space(c);
     
     if(!__readDatabaseString(c, buffer, &o)) return 0;
 
@@ -167,6 +88,7 @@ struct PowerPlantsRow* __loadPowerPlantDatabaseFileLine(const char **c) {
     }
 
     // ### Maximum rated capacity ###
+    space(c);
 
     if(!__readDatabaseFloat(c, buffer, &o)) return 0;
 
@@ -177,6 +99,7 @@ struct PowerPlantsRow* __loadPowerPlantDatabaseFileLine(const char **c) {
         return 0;
     }
     // ### Avg production cost ###
+    space(c);
 
     if(!__readDatabaseFloat(c, buffer, &o)) return 0;
 
@@ -201,7 +124,16 @@ uint8_t loadPowerPlantDatabaseFile(struct Table *powerPlants, const char *raw) {
         // If end-of-file
         if(*c == 0) break;
 
+        // Skip comment lines
+        if(*c == '#') {
+            while(*c != '\n') c++;
+            continue;
+        }
+
         struct PowerPlantsRow* row = __loadPowerPlantDatabaseFileLine(&c);
+
+        // If pointer is invalid, then that file probably had a syntax error
+        // Skip this line
         if(row == 0) {
             printf("problem on line %d\n", line);
 
@@ -210,6 +142,7 @@ uint8_t loadPowerPlantDatabaseFile(struct Table *powerPlants, const char *raw) {
             continue;
         }
 
+        // PK isn't allowed to be zero
         if(row->plantID == 0) {
             printf("power plant's PK can't be 0, skipping line %d\n", line);
 
@@ -218,6 +151,7 @@ uint8_t loadPowerPlantDatabaseFile(struct Table *powerPlants, const char *raw) {
             continue;
         }
 
+        // Duplicate PK-s aren't allowed
         if(tableHasMatch(powerPlants, __powerPlantIDMatcher, (void*)&row->plantID)) {
             printf("duplicate PK %d on line %d\n", row->plantID, line);
 
@@ -226,7 +160,7 @@ uint8_t loadPowerPlantDatabaseFile(struct Table *powerPlants, const char *raw) {
             continue;
         }
 
-
+        // Store the parsed power plant information in given table
         tableInsert(powerPlants, row->plantID, row);
 
         free(row);
@@ -237,9 +171,16 @@ uint8_t loadPowerPlantDatabaseFile(struct Table *powerPlants, const char *raw) {
     return 1;
 }
 
-int main(int argc, const char *args[]) {
+int database_test(int argc, const char *args[]) {
     struct Table table = tableCreate(sizeof(struct PowerPlantsRow));
-    int r = loadPowerPlantDatabaseFile(&table, readEntireFile(args[1]));
+
+    char* file = readEntireFile(args[1]);
+    if(file == 0) {
+        return 1;
+    }
+    int r = loadPowerPlantDatabaseFile(&table, file);
+    free(file);
+
     printf("================\n");
     printf("return code: %d\n", r);
 

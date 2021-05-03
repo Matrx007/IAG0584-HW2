@@ -4,6 +4,19 @@
 #include <stdlib.h>
 #include <string.h>
 
+struct Table tableCreate(int unitSize);
+struct Table tableCreateAdv(int unitSize, int initialSize, float growthRate);
+void __tableGrow(struct Table *table, int target);
+void tablePack(struct Table *table);
+int tableInsert(struct Table *table, int index, void *data);
+void tableRemove(struct Table *table, int index);
+void tableChange(struct Table *table, int index, void *data);
+uint8_t tableHasMatch(struct Table *table, uint8_t (*matcher)(void* data, void* args), void* args);
+int tableCountMatches(struct Table *table, uint8_t (*matcher)(void* data, void* args), void* args);
+void tableShrink(struct Table *table, uint8_t (*tester)(void* data));
+void tableForEach(struct Table *table, void (*action)(void* data, void* args), void* args);
+uint8_t isNumber5(void* data, void* args);
+uint8_t numberTester(void* data);
 
 struct Table {
     int __actualSize;
@@ -44,7 +57,7 @@ struct Table tableCreateAdv(int unitSize, int initialSize, float growthRate) {
 void __tableGrow(struct Table *table, int target) {
     target++;
     
-    if(target < table->__actualSize) {
+    if(target < table->size) {
         printf("internal error: attempting to shrink table\n");
         abort();
     }

@@ -1,0 +1,76 @@
+# Iga energiatootja nimi, energiaallikas ja võimsus vastab tõele
+
+# Ige energiajootja tootmiskulu/MW ei vasta tõele vaid on suvaliselt 
+# arvutad oletades, et mida rohkem toodetakse seda odavam on järelikult
+# tootmine
+
+01, "Aburi tuulepark",              "tuuleenergia",         1.8,        8.56
+02, "Aseriaru tuulepark",           "tuuleenergia",         24.0,       3.63
+03, "Aulepa tuulepark",             "tuuleenergia",         48.0,       5.42
+04, "Esivere tuulepark",            "tuuleenergia",         8.0,        4.14
+05, "Läätsa tuulepark",             "tuuleenergia",         3.0,        8.61
+06, "Mäli tuulepark",               "tuuleenergia",         12.0,       1.03
+07, "Narva tuhavälja tuulepark",    "tuuleenergia",         39.0,       3.41
+08, "Nasva tuulepark",              "tuuleenergia",         1.6,        2.79
+09, "Nasva tuulik I",               "tuuleenergia",         2.3,        7.41
+10, "Nasva tuulik II",              "tuuleenergia",         3.6,        0.85
+11, "Ojaküla tuulepark",            "tuuleenergia",         6.9,        4.12
+12, "Pakri tuulepark",              "tuuleenergia",         18.9,       6.15
+13, "Paldiski tuulepark",           "tuuleenergia",         45.0,       8.74
+14, "Ruhnu tuulepark",              "tuuleenergia",         0.15,       5.15
+15, "Rõuste tuulepark",             "tuuleenergia",         12.0,       9.15
+16, "Sangla tuulik",                "tuuleenergia",         0.3,        5.08
+17, "Sikassaare tuulepark",         "tuuleenergia",         1.5,        6.28
+18, "Sääre tuulegeneraator",        "tuuleenergia",         0.225,      7.24
+19, "Tahkuna tuulegeneraator",      "tuuleenergia",         0.15,       5.00
+20, "Tamba tuulepark",              "tuuleenergia",         6.0,        9.35
+21, "Tooma I tuulepark",            "tuuleenergia",         16.0,       3.32
+22, "Tooma II tuulepark",           "tuuleenergia",         7.05,       0.06
+23, "Torgu tuulepark",              "tuuleenergia",         0.66,       7.65
+24, "Türju tuulikud",               "tuuleenergia",         0.3,        4.10
+25, "Vanaküla tuulepark",           "tuuleenergia",         9.0,        5.81
+26, "Virtsu I tuulepark",           "tuuleenergia",         2.6,        2.01
+27, "Virtsu II tuulepark",          "tuuleenergia",         6.9,        2.90
+28, "Virtsu III tuulepark",         "tuuleenergia",         6.9,        0.71
+29, "Viru-Nigula tuulepark",        "tuuleenergia",         24.0,       0.18
+
+
+30, "Auvere elektrijaam",               "soojusenergia, põlevkivi, biomass",        300.0,      3.65
+31, "Balti soojuselektrijaam",          "soojusenergia, põlevkivi, maagaas",        765.0,      5.72
+32, "Eesti soojuselektrijaam",          "soojusenergia, põlevkivi, biokütus",       1600.0,     2.68
+33, "Iru soojuselektrijaam",            "soojusenergia, segaolmejäätmed, maagaas",  190.0,      7.50
+34, "Kiisa avariireservelektrijaam",    "soojusenergia, maagaas, diisel",           250.0,      2.06
+35, "Kohtla-Järve soojuselektrijaam",   "soojusenergia, põlevkivi",                 100.0,      7.14
+36, "Sillamäe Soojuselektrijaam",       "soojusenergia, maagaas, põlevkivi",        18.0,       3.27
+37, "Tallinna elektrijaam",             "soojusenergia, turvas, puit",              46.95,      2.20
+
+
+38, "Ala-Rõuge külalistemaja hüdroelektrijaam",      "hüdroenergia",    0.01,       2.92
+39, "Linnamäe hüdroelektrijaam",                     "hüdroenergia",    1.152,      9.12
+40, "Tõrve hüdroelektrijaam",                        "hüdroenergia",    0.12,       5.84
+41, "Sindi hüdroelektrijaam",                        "hüdroenergia",    1.29,       8.66
+42, "Tudulinna hüdroelektrijaam",                    "hüdroenergia",    0.15,       3.09
+43, "Tamme hüdroelektrijaam",                        "hüdroenergia",    0.158,      9.66
+44, "Soodla hüdroelektrijaam",                       "hüdroenergia",    0.172,      4.78
+45, "Kakkoveski hüdroelektrijaam",                   "hüdroenergia",    0.018,      2.01
+46, "Leevi hüdroelektrijaam",                        "hüdroenergia",    0.18,       5.53
+47, "Leevaku hüdroelektrijaam",                      "hüdroenergia",    0.2,        5.54
+48, "Kotka hüdroelektrijaam",                        "hüdroenergia",    0.2,        9.84
+49, "Jägala hüdroelektrijaam",                       "hüdroenergia",    2.0,        7.45
+50, "Põlva hüdroelektrijaam",                        "hüdroenergia",    0.023,      4.88
+51, "Kaunissaare hüdroelektrijaam",                  "hüdroenergia",    0.246,      3.17
+52, "Kaarli hüdroelektrijaam",                       "hüdroenergia",    0.003,      0.86
+53, "Kunda Silla hüdroelektrijaam",                  "hüdroenergia",    0.33,       5.10
+54, "Saesaare hüdroelektrijaam",                     "hüdroenergia",    0.364,      3.67
+55, "Keila-Joa hüdroelektrijaam",                    "hüdroenergia",    0.365,      0.51
+56, "Koseveski hüdroelektrijaam",                    "hüdroenergia",    0.04,       2.30
+57, "Kunda hüdroelektrijaam",                        "hüdroenergia",    0.4,        6.15
+58, "Kamari hüdroelektrijaam",                       "hüdroenergia",    0.511,      4.88
+59, "Sillaoru hüdroelektrijaam",                     "hüdroenergia",    0.527,      7.92
+60, "Tammiku Hüdroelektrijaam",                      "hüdroenergia",    0.055,      3.74
+61, "Vihula hüdroelektrijaam",                       "hüdroenergia",    0.055,      0.74
+62, "Räpina paberivabriku hüdroelektrijaam",         "hüdroenergia",    0.06,       7.46
+63, "Sangaste hüdroelektrijaam",                     "hüdroenergia",    0.07,       0.69
+64, "Painküla hüdroelektrijaam",                     "hüdroenergia",    0.095,      0.37
+
+

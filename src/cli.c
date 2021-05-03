@@ -6,6 +6,10 @@
 #include "database.c"
 
 
+const char* prompt(const char *question);
+const char* promptFile(const char *question);
+
+
 
 const char* prompt(const char *question) {
     printf("%s: \n> ", question);
@@ -18,6 +22,7 @@ const char* prompt(const char *question) {
         *o = c;
         o++;
     }
+    *o = 0;
 
     return copyStringToHeap(buffer);
 }
@@ -39,22 +44,42 @@ const char* promptFile(const char *question) {
             case '>':
             case '|':
                 printf("Invalid file name, file name cannot contain ASCII's control characters nor one of those: \\/:*?\"<>|\n");
-                free(input);
+                free((char*)input);
                 return promptFile(question);
             default:
                 c++;
         }
     }
 
-    return 0;
+    return input;
 }
 
 int main(int argc, char **args) {
-    int r = loadPowerPlantDatabaseFile(promptFile("Enter power plant data file"));
+    struct Table table = tableCreate(sizeof(struct PowerPlantsRow));
+    
+    const char* fileName = promptFile("Enter power plant data file");
+    if(fileName == 0) {
+        printf("invalid file name\n");
+        return 1;
+    }
+
+
+    char* file = readEntireFile(fileName);
+    if(file == 0) {
+        printf("failed to read file\n");
+        return 1;
+    }
+
+
+    int r = loadPowerPlantDatabaseFile(&table, file);
+
+    free((char*)fileName);
+    free(file);
+
     printf("DATA: ==============\n");
 
-    for (int i = 0; i < n_powerPlants; i++) {
-        struct PowerPlantsRow *row = powerPlants[i];
+    for (int i = 0; i < table.size; i++) {
+        struct PowerPlantsRow *row = tableGet(&table, i);
         
         // break instead of continue because once there's a null 
         // pointer, everything after that will be too

@@ -1,14 +1,77 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 // #include "memory.h"
 // #include "memory.c"
 #include "database.c"
 
+struct State {
+    struct Table* powerPlants;
+    struct Table* dailyStats; 
+
+    struct Vector* selectedPowerPlants;
+    struct Vector* selectedDailyStats;
+};
 
 const char* prompt(const char *question);
 const char* promptFile(const char *question);
 
+void executeCommand(struct Table* powerPlants, struct Table* dailyStats, struct Vector* selectedPowerPlants, struct Vector* selectedDailyStats);
+
+void command_import(struct Table* powerPlants, struct Table* dailyStats, struct Vector* selectedPowerPlants, struct Vector* selectedDailyStats);
+void command_export(struct Table* powerPlants, struct Table* dailyStats, struct Vector* selectedPowerPlants, struct Vector* selectedDailyStats);
+
+void command_select(struct Table* powerPlants, struct Table* dailyStats, struct Vector* selectedPowerPlants, struct Vector* selectedDailyStats);
+void command_deselect(struct Table* powerPlants, struct Table* dailyStats, struct Vector* selectedPowerPlants, struct Vector* selectedDailyStats);
+
+void command_insert(struct Table* powerPlants, struct Table* dailyStats, struct Vector* selectedPowerPlants, struct Vector* selectedDailyStats);
+void command_delete(struct Table* powerPlants, struct Table* dailyStats, struct Vector* selectedPowerPlants, struct Vector* selectedDailyStats);
+
+void command_stats(struct Table* powerPlants, struct Table* dailyStats, struct Vector* selectedPowerPlants, struct Vector* selectedDailyStats);
+void command_plants(struct Table* powerPlants, struct Table* dailyStats, struct Vector* selectedPowerPlants, struct Vector* selectedDailyStats);
+
+void command_list(struct Table* powerPlants, struct Table* dailyStats, struct Vector* selectedPowerPlants, struct Vector* selectedDailyStats);
+
+void executeCommand(struct Table* powerPlants, struct Table* dailyStats, struct Vector* selectedPowerPlants, struct Vector* selectedDailyStats) {
+
+    // ### READ USER INPUT ###
+
+    printf(" > ");
+
+    char buffer[512];
+    char *o = buffer;
+
+    char c;
+    while((c = fgetc(stdin)) != '\n' && o-buffer < 512 && c != 0) {
+        *o = c;
+        o++;
+    }
+    *o = 0;
+
+    // ### CALL SUB-COMMANDS ###
+
+    if(memcmp(buffer, "exit", 4) == 0) {
+        exit(0);
+        return;
+    }
+
+    if(memcmp(buffer, "open", 4) == 0) {
+        o += 4;
+        while(*o == ' ' && o-buffer < 512) {
+            o++;
+        }
+        if(*o != '\n') {
+            printf("\n'open' command doesn't expect arguments\n");
+            return;
+        }
+
+
+
+        return;
+    }
+
+}
 
 
 const char* prompt(const char *question) {

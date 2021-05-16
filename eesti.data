@@ -1,8 +1,7 @@
 # Iga energiatootja nimi, energiaallikas ja võimsus vastab tõele
 
 # Ige energiajootja tootmiskulu/MW ei vasta tõele vaid on suvaliselt 
-# arvutad oletades, et mida rohkem toodetakse seda odavam on järelikult
-# tootmine
+# arvutad hetkel kuna puudnub täpsem informatsioon
 
 01, "Aburi tuulepark",              "tuuleenergia",         1.8,        8.56
 02, "Aseriaru tuulepark",           "tuuleenergia",         24.0,       3.63

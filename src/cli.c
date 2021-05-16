@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,60 +18,125 @@ struct State {
 const char* prompt(const char *question);
 const char* promptFile(const char *question);
 
-void executeCommand(struct Table* powerPlants, struct Table* dailyStats, struct Vector* selectedPowerPlants, struct Vector* selectedDailyStats);
+// Vector<char*>
+struct Vector readWords();
 
-void command_import(struct Table* powerPlants, struct Table* dailyStats, struct Vector* selectedPowerPlants, struct Vector* selectedDailyStats);
-void command_export(struct Table* powerPlants, struct Table* dailyStats, struct Vector* selectedPowerPlants, struct Vector* selectedDailyStats);
+void executeCommand(struct State *state);
 
-void command_select(struct Table* powerPlants, struct Table* dailyStats, struct Vector* selectedPowerPlants, struct Vector* selectedDailyStats);
-void command_deselect(struct Table* powerPlants, struct Table* dailyStats, struct Vector* selectedPowerPlants, struct Vector* selectedDailyStats);
+void command_import(struct State *state, struct Vector *words);
+void command_export(struct State *state, struct Vector *words);
 
-void command_insert(struct Table* powerPlants, struct Table* dailyStats, struct Vector* selectedPowerPlants, struct Vector* selectedDailyStats);
-void command_delete(struct Table* powerPlants, struct Table* dailyStats, struct Vector* selectedPowerPlants, struct Vector* selectedDailyStats);
+void command_select(struct State *state, struct Vector *words);
+void command_deselect(struct State *state, struct Vector *words);
 
-void command_stats(struct Table* powerPlants, struct Table* dailyStats, struct Vector* selectedPowerPlants, struct Vector* selectedDailyStats);
-void command_plants(struct Table* powerPlants, struct Table* dailyStats, struct Vector* selectedPowerPlants, struct Vector* selectedDailyStats);
+void command_insert(struct State *state, struct Vector *words);
+void command_delete(struct State *state, struct Vector *words);
 
-void command_list(struct Table* powerPlants, struct Table* dailyStats, struct Vector* selectedPowerPlants, struct Vector* selectedDailyStats);
+void command_stats(struct State *state, struct Vector *words);
+void command_plants(struct State *state, struct Vector *words);
 
-void executeCommand(struct Table* powerPlants, struct Table* dailyStats, struct Vector* selectedPowerPlants, struct Vector* selectedDailyStats) {
+void command_list(struct State *state, struct Vector *words);
+
+void flushAndExit();
+
+
+
+void executeCommand(struct State *state) {
 
     // ### READ USER INPUT ###
 
     printf(" > ");
 
-    char buffer[512];
-    char *o = buffer;
+    struct Vector words = readWords();
 
-    char c;
-    while((c = fgetc(stdin)) != '\n' && o-buffer < 512 && c != 0) {
-        *o = c;
-        o++;
+    if(words.size == 0) return;
+
+    if(strcmp("exit", vectorGet(&words, 0))) {
+        flushAndExit();
+    } else if (strcmp("import", vectorGet(&words, 0))) {
+        command_import(state, &words);
+    } else if (strcmp("export", vectorGet(&words, 0))) {
+        command_export(state, &words);
+    } else if (strcmp("select", vectorGet(&words, 0))) {
+        command_select(state, &words);
+    } else if (strcmp("deselect", vectorGet(&words, 0))) {
+        command_deselect(state, &words);
+    } else if (strcmp("insert", vectorGet(&words, 0))) {
+        command_insert(state, &words);
+    } else if (strcmp("delete", vectorGet(&words, 0))) {
+        command_delete(state, &words);
+    } else if (strcmp("stats", vectorGet(&words, 0))) {
+        command_stats(state, &words);
+    } else if (strcmp("plants", vectorGet(&words, 0))) {
+        command_plants(state, &words);
+    } else if (strcmp("list", vectorGet(&words, 0))) {
+        command_list(state, &words);
+    } else {
+        printf("Unknown command\n");
     }
-    *o = 0;
+}
 
-    // ### CALL SUB-COMMANDS ###
 
-    if(memcmp(buffer, "exit", 4) == 0) {
-        exit(0);
+
+void command_import(struct State *state, struct Vector *words) {
+    if(words->size < 2) {
+        printf("import syntax: <file name>\n");
         return;
     }
 
-    if(memcmp(buffer, "open", 4) == 0) {
-        o += 4;
-        while(*o == ' ' && o-buffer < 512) {
-            o++;
-        }
-        if(*o != '\n') {
-            printf("\n'open' command doesn't expect arguments\n");
-            return;
-        }
+    uint8_t success = readPowerPlantDatabaseFile(state->powerPlants, vectorGet(words, 1));
+    if(!success) {
+        printf("failed to read database file\n");
+    }
+}
+
+void command_export(struct State *state, struct Vector *words) {
+
+}
 
 
-
+void command_select(struct State *state, struct Vector *words) {
+    if(words->size < 2) {
+        printf("select syntax: \"power plants\"/\"daily stats\" [contains <string> / matches <pattern>]\n");
         return;
     }
+}
 
+void command_deselect(struct State *state, struct Vector *words) {
+    if(words->size < 2) {
+        printf("select syntax: \"power plants\"/\"daily stats\" [contains <string> / matches <pattern>]\n");
+        return;
+    }
+}
+
+
+void command_insert(struct State *state, struct Vector *words) {
+
+}
+
+void command_delete(struct State *state, struct Vector *words) {
+
+}
+
+
+void command_stats(struct State *state, struct Vector *words) {
+
+}
+
+void command_plants(struct State *state, struct Vector *words) {
+
+}
+
+
+void command_list(struct State *state, struct Vector *words) {
+
+}
+
+
+void flushAndExit(struct State *state) {
+    tableForEach(state->dailyStats,  __freeReferences, 0);
+    tableForEach(state->powerPlants, __freeReferences, 0);
+    // TODO: pack vectors & tables (maybe problems if vector/table is empty)
 }
 
 
@@ -117,7 +183,81 @@ const char* promptFile(const char *question) {
     return input;
 }
 
+struct Vector readWords() {
+
+    struct Vector words = vectorCreate(sizeof(char *));
+
+    char buffer[256];
+
+    char c;
+
+    do {
+        char *o = buffer;
+
+        int escaping = 0;
+        int inString = 0;
+        while(((c = fgetc(stdin)) != ' ' || inString) && o-buffer < 512 && c != 0 && c != '\n') {
+            if(c =='"') {
+                inString = !inString;
+                continue;
+            }
+
+            if(inString) {
+                if(escaping) {
+                    switch (c) {
+                        case 'n':
+                            *o = '\n';
+                            continue;
+                            break;
+                        case '"':
+                            *o = '"';
+                            continue;
+                            break;
+                        default:
+                            break;
+                    }
+
+                    escaping = 0;
+                }
+
+                if(c == '\\') {
+                    escaping = 1;
+                    continue;
+                }
+            }
+
+            *o = c;
+            o++;
+        }
+
+        *o = 0;
+
+        const char* string = copyStringToHeap(buffer);
+        vectorAdd(&words, &string);
+    } while(c != '\n');
+
+    vectorPack(&words);
+
+    return words;
+}
+
+void printWords(void* data, void* args) {
+    printf("word: %s\n", *(char **) data);
+}
+
 int main(int argc, char **args) {
+
+    struct Vector words = readWords();
+
+    // void vectorForEach(struct Vector *vector, void (*action)(void* data, void* args), void* args)
+    vectorForEach(&words, printWords, 0);
+
+
+
+
+
+    if(1) return 0;
+
     struct Table table = tableCreate(sizeof(struct PowerPlantsRow));
     
     const char* fileName = promptFile("Enter power plant data file");

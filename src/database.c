@@ -171,6 +171,16 @@ uint8_t loadPowerPlantDatabaseFile(struct Table *powerPlants, const char *raw) {
     return 1;
 }
 
+uint8_t readPowerPlantDatabaseFile(struct Table *powerPlants, char *file) {
+    char* data = readEntireFile(file);
+    if(data == 0) {
+        return 1;
+    }
+    int r = loadPowerPlantDatabaseFile(powerPlants, data);
+    free(data);
+    return r;
+}
+
 int database_test(int argc, const char *args[]) {
     struct Table table = tableCreate(sizeof(struct PowerPlantsRow));
 

@@ -5,5 +5,7 @@
 a,
 2,"plant c","oil",5.0,5.3
 -3,"plant o","solar energy",1.0,0.3
-10,"plant w","hydrogen",50.0,50.3
+10,         "plant w","              hydrogen          
+                                                                              ",50.0,50.3
+10 "plant w","hydrogen",50.0,50.3
 

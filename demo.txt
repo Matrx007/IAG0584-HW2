@@ -1,5 +1,10 @@
- > select "power plants" contains "soojusenergia"
+ > select power-plants contains "soojusenergia"
+
+8 power plants and 0 logs in selection.
+
  > list
+
+8 power plants and 0 logs in selection.
 
 Plant ID, plant name, plant type, rated capacity, production cost
 
@@ -12,7 +17,9 @@ Plant ID, plant name, plant type, rated capacity, production cost
 36, "Sillamäe Soojuselektrijaam",       "soojusenergia, maagaas, põlevkivi",        18.0,       3.27
 37, "Tallinna elektrijaam",             "soojusenergia, turvas, puit",              46.95,      2.20
 
- > sort "rated capacity"
+ > sort rated-capacity ascending
+
+8 power plants and 0 logs in selection.
 
 Plant ID, plant name, plant type, rated capacity, production cost
 
@@ -25,8 +32,13 @@ Plant ID, plant name, plant type, rated capacity, production cost
 31, "Balti soojuselektrijaam",          "soojusenergia, põlevkivi, maagaas",        765.0,      5.72
 32, "Eesti soojuselektrijaam",          "soojusenergia, põlevkivi, biokütus",       1600.0,     2.68
 
- > stats
+ > select logs referenced
+
+8 power plants and 12 logs in selection.
+
  > list
+
+8 power plants and 12 logs in selection.
  
 Plant ID, plant name, plant type, rated capacity, production cost
  
@@ -49,5 +61,7 @@ Production log ID, plant ID, daily production, avg sales price, date
 8256,       30,       285.34,       15.93,      1555899556
 5483,       31,       692.75875,    18.90,      1554246975
 3234,       32,       1583.43,      16.13,      1556192225
-
-
+4388,       34,       247.35,       18.8,       1553787444
+3789,       30,       285.34,       12.23,      1555899556
+3578,       31,       692.75875,    15.56,      1554246932
+2347,       32,       1583.43,      12.46,      1556192254

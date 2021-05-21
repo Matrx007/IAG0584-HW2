@@ -15,6 +15,8 @@ uint8_t tableHasMatch(struct Table *table, uint8_t (*matcher)(void* data, void* 
 int tableCountMatches(struct Table *table, uint8_t (*matcher)(void* data, void* args), void* args);
 void tableShrink(struct Table *table, uint8_t (*tester)(void* data));
 void tableForEach(struct Table *table, void (*action)(void* data, void* args), void* args);
+void __freeReferences(void* data, void* args);
+void tableClear(struct Table *table);
 uint8_t isNumber5(void* data, void* args);
 uint8_t numberTester(void* data);
 
@@ -200,6 +202,15 @@ void actionForEachElement(void* data, void* args) {
     if(num != 0) {
         printf("%d\n", num);
     }
+}
+
+void __freeReferences(void* data, void* args) {
+    free(data);
+}
+
+void tableClear(struct Table *table) {
+    memset(table->__data, 0, table->size*table->__unitSize);
+    table->size = 0;
 }
 
 uint8_t isNumber5(void* data, void* args) {

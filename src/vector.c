@@ -155,6 +155,11 @@ void vectorForEach(struct Vector *vector, void (*action)(void* data, void* args)
     }
 }
 
+void vectorClear(struct Vector *vector) {
+    memset(vector->__data, 0, vector->size*vector->__unitSize);
+    vector->size = 0;
+}
+
 int vector_test(int argc, char **args) {
     struct Vector vector = vectorCreate(sizeof(int));
 

@@ -97,8 +97,15 @@ void command_export(struct State *state, struct Vector *words) {
 
 void command_select(struct State *state, struct Vector *words) {
     if(words->size < 2) {
-        printf("select syntax: \"power plants\"/\"daily stats\" [contains <string> / matches <pattern>]\n");
+        printf("select syntax: power-plants / daily-stats [contains <string> / matches <pattern>]\n");
         return;
+    }
+
+    char* firstWord = vectorGet(words, 1);
+    if(strcmp(firstWord, "power-plants")) {
+        
+    } else if(strcmp(firstWord, "daily-stats")) {
+        
     }
 }
 

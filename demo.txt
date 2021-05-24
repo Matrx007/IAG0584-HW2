@@ -1,4 +1,4 @@
- > select power-plants contains "soojusenergia"
+ > SELECT power-plants FROM name CONTAINS "soojusenergia"
 
 8 power plants and 0 logs in selection.
 

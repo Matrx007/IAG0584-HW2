@@ -251,11 +251,6 @@ struct DailyStatisticsRow* __loadDailyLogDatabaseFileLine(const char **c) {
 
     log->dateEpoch = atoi(buffer);
 
-    // If no comma after field
-    if(!eat(c, ',')) {
-        return 0;
-    }
-
     return log;    
 }
 

@@ -631,7 +631,7 @@ int main(int argc, char **args) {
     free((char*)fileName);
     free(file);
 
-    printf("DATA: ==============\n");
+    printf("POWER PLANTS: ==============\n");
 
     for (int i = 0; i < plants.size; i++) {
         struct PowerPlantsRow *row = tableGet(&plants, i);
@@ -647,6 +647,43 @@ int main(int argc, char **args) {
         printf("plant type: %s\n", row->plantType);
         printf("max rated capacity: %f\n", row->maxRatedCapacity);
         printf("avg production cost: %f\n", row->avgProductionCost);
+    }
+    
+    fileName = promptFile("Enter daily statistics log file");
+    if(fileName == 0) {
+        printf("invalid file name\n");
+        return 1;
+    }
+
+
+    file = readEntireFile(fileName);
+    if(file == 0) {
+        printf("failed to read file\n");
+        return 1;
+    }
+
+
+    r = loadDailyLogDatabaseFile(&logs, file);
+
+    free((char*)fileName);
+    free(file);
+
+    printf("DAILY LOGS: ==============\n");
+
+    for (int i = 0; i < logs.size; i++) {
+        struct DailyStatisticsRow *row = tableGet(&logs, i);
+        
+        // break instead of continue because once there's a null 
+        // pointer, everything after that will be too
+        if(row == 0) continue;
+
+        printf("report no %d:\n", i);
+
+        printf("report ID: %d\n", row->reportID);
+        printf("plant ID: %d\n", row->plantID);
+        printf("daily production: %f\n", row->dailyProduction);
+        printf("avg sales price: %f\n", row->avgSalesPrice);
+        printf("date epoch: %d\n", row->dateEpoch);
     }
 
     struct State state;

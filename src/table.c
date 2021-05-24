@@ -191,6 +191,8 @@ void tableShrink(struct Table *table, uint8_t (*tester)(void* data)) {
 }
 
 void tableForEach(struct Table *table, void (*action)(void* data, void* args), void* args) {
+    if(table == 0) return;
+    if(table->size == 0) return;
 
     for(int i = 0; i < table->size; i++) {
         action(tableGet(table, i), args);

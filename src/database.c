@@ -37,9 +37,9 @@ struct DailyStatisticsRow {
     uint32_t dateEpoch;
 };
 
-// ####################
-// ### FILE PARSING ###
-// ####################
+// ################################
+// ### POWER PLANT DATA PARSING ###
+// ################################
 
 
 struct PowerPlantsRow* __loadPowerPlantDatabaseFileLine(const char **c) {
@@ -177,6 +177,157 @@ uint8_t readPowerPlantDatabaseFile(struct Table *powerPlants, char *file) {
         return 1;
     }
     int r = loadPowerPlantDatabaseFile(powerPlants, data);
+    free(data);
+    return r;
+}
+
+
+// ##########################
+// ### DAILY LOGS PARSING ###
+// ##########################
+
+
+struct DailyStatisticsRow* __loadDailyLogDatabaseFileLine(const char **c) {
+    struct DailyStatisticsRow *log = malloc(sizeof(struct DailyStatisticsRow));
+
+    trim(c);
+
+    char buffer[256];
+    // aka output: points to current character in buffer
+    char *o;
+
+    // ### Log ID ###
+    space(c);
+
+    if(!__readDatabaseInteger(c, buffer, &o)) return 0;
+
+    log->reportID = atoi(buffer);
+
+    // If no comma after field
+    if(!eat(c, ',')) {
+        return 0;
+    }
+
+    // ### Plant ID ###
+    space(c);
+
+    if(!__readDatabaseInteger(c, buffer, &o)) return 0;
+
+    log->plantID = atoi(buffer);
+
+    // If no comma after field
+    if(!eat(c, ',')) {
+        return 0;
+    }
+
+    // ### Daily production ###
+    space(c);
+
+    if(!__readDatabaseFloat(c, buffer, &o)) return 0;
+
+    log->dailyProduction = atof(buffer);
+
+    // If no comma after field
+    if(!eat(c, ',')) {
+        return 0;
+    }
+
+    // ### Avg. sales price ###
+    space(c);
+
+    if(!__readDatabaseFloat(c, buffer, &o)) return 0;
+
+    log->avgSalesPrice = atof(buffer);
+
+    // If no comma after field
+    if(!eat(c, ',')) {
+        return 0;
+    }
+
+    // ### Date time epoch ###
+    space(c);
+
+    if(!__readDatabaseInteger(c, buffer, &o)) return 0;
+
+    log->dateEpoch = atoi(buffer);
+
+    // If no comma after field
+    if(!eat(c, ',')) {
+        return 0;
+    }
+
+    return log;    
+}
+
+uint8_t __dailyLogIDMatcher(void* data, void* args) {
+    return ((struct DailyStatisticsRow*) data)->reportID == *(u_int32_t*)args;
+}
+
+uint8_t loadDailyLogDatabaseFile(struct Table *dailyLogs, const char *raw) {
+    const char *c = raw;
+
+    int i = 0;
+    int line = 0;
+    do {
+        line++;
+        trim(&c);
+        
+        // If end-of-file
+        if(*c == 0) break;
+
+        // Skip comment lines
+        if(*c == '#') {
+            while(*c != '\n') c++;
+            continue;
+        }
+
+        struct DailyStatisticsRow* log = __loadDailyLogDatabaseFileLine(&c);
+
+        // If pointer is invalid, then that file probably had a syntax error
+        // Skip this line
+        if(log == 0) {
+            printf("problem on line %d\n", line);
+
+            // Skip this line
+            while(*c != '\n') c++;
+            continue;
+        }
+
+        // PK isn't allowed to be zero
+        if(log->reportID == 0) {
+            printf("report's PK can't be 0, skipping line %d\n", line);
+
+            // Skip this line
+            while(*c != '\n') c++;
+            continue;
+        }
+
+        // Duplicate PK-s aren't allowed
+        if(tableHasMatch(dailyLogs, __dailyLogIDMatcher, (void*)&log->reportID)) {
+            printf("duplicate PK %d on line %d\n", log->reportID, line);
+
+            // Skip this line
+            while(*c != '\n') c++;
+            continue;
+        }
+
+        // Store the parsed power plant information in given table
+        tableInsert(dailyLogs, log->reportID, log);
+
+        free(log);
+
+        space(&c);
+    } while(*c == '\n');
+
+    return 1;
+}
+
+uint8_t readDailyLogDatabaseFile(struct Table *dailyLogs, char *file) {
+    char* data = readEntireFile(file);
+    if(data == 0) {
+        return 1;
+    }
+    int r = loadDailyLogDatabaseFile(dailyLogs, data);
     free(data);
     return r;
 }

@@ -9,6 +9,7 @@
 // #include "memory.h"
 // #include "memory.c"
 #include "database.c"
+#include "string_utils.c"
 
 struct State {
     struct Table* powerPlants;
@@ -29,13 +30,15 @@ void executeCommand(struct State *state);
 void command_import(struct State *state, struct Vector *words);
 void command_export(struct State *state, struct Vector *words);
 
-void command_select(struct State *state, struct Vector *words);
-void command_deselect(struct State *state, struct Vector *words);
+const char* syntax_select = "syntax: SELECT (power-plants / logs) WHERE <column> (CONTAINS <string> / EQUALS <value>)";
+void command_selection(struct State *state, struct Vector *words);
+void command_select(struct State *state, struct Vector *words, void(*action)(void*, void*));
 
 void command_insert(struct State *state, struct Vector *words);
+const char* syntax_delete = "syntax: DELETE (power-plants / logs)";
 void command_delete(struct State *state, struct Vector *words);
 
-void command_stats(struct State *state, struct Vector *words);
+void command_logs(struct State *state, struct Vector *words);
 void command_plants(struct State *state, struct Vector *words);
 
 void command_list(struct State *state, struct Vector *words);
@@ -92,16 +95,14 @@ void executeCommand(struct State *state) {
         command_import(state, &words);
     } else if (!strcmp("EXPORT", *firstWord)) {
         command_export(state, &words);
-    } else if (!strcmp("SELECT", *firstWord)) {
-        command_select(state, &words);
-    } else if (!strcmp("DESELECT", *firstWord)) {
-        command_deselect(state, &words);
+    } else if ((!strcmp("SELECT", *firstWord)) || (!strcmp("DESELECT", *firstWord))) {
+        command_selection(state, &words);
     } else if (!strcmp("INSERT", *firstWord)) {
         command_insert(state, &words);
     } else if (!strcmp("DELETE", *firstWord)) {
         command_delete(state, &words);
-    } else if (!strcmp("STATS", *firstWord)) {
-        command_stats(state, &words);
+    } else if (!strcmp("LOGS", *firstWord)) {
+        command_logs(state, &words);
     } else if (!strcmp("PLANTS", *firstWord)) {
         command_plants(state, &words);
     } else if (!strcmp("LIST", *firstWord)) {
@@ -129,8 +130,25 @@ void command_export(struct State *state, struct Vector *words) {
 
 }
 
-const char* syntax_select = "syntax: SELECT (power-plants / logs) WHERE <column> (CONTAINS <string> / EQUALS <value>)";
-void command_select(struct State *state, struct Vector *words) {
+void command_selection(struct State *state, struct Vector *words) {
+    if(words->size < 1) {
+        return;
+    }
+
+    char* command = *(char**)vectorGet(words, 0);
+    
+    if(!strcmp(command, "SELECT")) {
+        command_select(state, words, __selectionMatcherAction_select);
+    } else if(!strcmp(command, "DESELECT")) {
+        command_select(state, words, __selectionMatcherAction_deselect);
+    } else {
+        printf("Unknown command\n");
+        return;
+    }
+}
+
+
+void command_select(struct State *state, struct Vector *words, void(*action)(void*, void*)) {
     if(words->size < 2) {
         printf("%s\n", syntax_select);
         return;
@@ -165,7 +183,7 @@ void command_select(struct State *state, struct Vector *words) {
 
         matcher = __selectionMatcher_passthrough;
         
-        data = (struct __MATCHER_DATA){ SELECT, field, 0, __selectionMatcherAction_select, dest };
+        data = (struct __MATCHER_DATA){ SELECT, field, 0, action, dest };
 
         goto findMatches;
     } else if(words->size < 6) {
@@ -209,7 +227,7 @@ void command_select(struct State *state, struct Vector *words) {
 
     findMatches:
 
-    data = (struct __MATCHER_DATA){ SELECT, field, matcherString, __selectionMatcherAction_select, dest };
+    data = (struct __MATCHER_DATA){ SELECT, field, matcherString, action, dest };
 
     tableForEach(source, matcher, &data);
 
@@ -229,12 +247,52 @@ void command_insert(struct State *state, struct Vector *words) {
 
 }
 
+uint8_t __isIDNonZero(void* data, void* args) {
+    return *(u_int32_t*)data != 0;
+}
+
+int __countRows(struct Table* table) {
+    return tableCountMatches(table, __isIDNonZero, 0);
+}
+
+uint8_t __deleter(void* data, void* args) {
+
+    // works on both, power plants and logs, as the PK is the first elemnt in both structs
+    return *(uint32_t*)data == *(uint32_t*)args;
+}
+
+void __deleteElementsFromTable(void* data, void* args) {
+    tableRemoveIf(args, __deleter, data);
+}
+
 void command_delete(struct State *state, struct Vector *words) {
 
+    char* sourceName = *(char**)vectorGet(words, 1);
+
+    int plantsDeleted = 0;
+    int logsDeleted = 0;
+    
+    if(!strcmp(sourceName, "power-plants")) {
+        plantsDeleted = __countRows(state->powerPlants);
+        vectorForEach(state->selectedPowerPlants, __deleteElementsFromTable, state->powerPlants);
+        vectorClear(state->selectedPowerPlants);
+        plantsDeleted -= __countRows(state->powerPlants);
+    } else if(!strcmp(sourceName, "logs")) {
+        logsDeleted = __countRows(state->dailyStats);
+        vectorForEach(state->selectedDailyStats, __deleteElementsFromTable, state->dailyStats);
+        vectorClear(state->selectedPowerPlants);
+        logsDeleted -= __countRows(state->dailyStats);
+    } else {
+        printf("err: unknown table \"%s\"\n", sourceName);
+        return;
+    }
+
+    printf("\nDeleted %d power plants and %d daily reports.\n\n", 
+            plantsDeleted, logsDeleted);
 }
 
 
-void command_stats(struct State *state, struct Vector *words) {
+void command_logs(struct State *state, struct Vector *words) {
 
 }
 
@@ -306,15 +364,15 @@ void __selectionMatcherAction_select(void* data, void* args) {
 }
 
 uint8_t __deselector(void* data, void* args) {
-    struct PowerPlantsRow* plant = data;
 
-    // works on both, power plants and logs, as the PK is the first elemnt in struct
-    return plant->plantID == 0;
+    // works on both, power plants and logs, as the PK is the first elemnt in both structs
+    return *(uint32_t*)data == *(uint32_t*)args;
 }
 
 void __selectionMatcherAction_deselect(void* data, void* args) {
     struct __MATCHER_DATA* mdata = args;
-    vectorRemoveIf(mdata->dest, __deselector, args);
+
+    vectorRemoveIf(mdata->dest, __deselector, data);
 }
 
 void __selectionMatcher_contains(void* data, void* args) {
@@ -323,7 +381,7 @@ void __selectionMatcher_contains(void* data, void* args) {
     struct DailyStatisticsRow* log = data;
     int callAction = 0;
 
-    // works on both, power plants and logs, as the PK is the first elemnt in struct
+    // works on both, power plants and logs, as the PK is the first elemnt in both structs
     if(plant->plantID == 0) return; 
 
     switch (mdata->field) {
@@ -338,10 +396,10 @@ void __selectionMatcher_contains(void* data, void* args) {
             return;
         
         case PLANT_NAME:
-            callAction = strstr(plant->plantName, mdata->matchString) != 0;
+            callAction = contains(plant->plantName, mdata->matchString);
             break;
         case PLANT_TYPE:
-            callAction = strstr(plant->plantType, mdata->matchString) != 0;
+            callAction = contains(plant->plantType, mdata->matchString);
             break;
         
         default:

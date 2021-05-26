@@ -1,0 +1,17 @@
+"filename", "language", "C", "C++", "comment", "blank", "total"
+"/home/mx007/projects/TalTechKursused/IAG0584/hw2/src/__database.c", "C", 171, 0, 27, 66, 264
+"/home/mx007/projects/TalTechKursused/IAG0584/hw2/src/cli.c", "C", 571, 0, 20, 165, 756
+"/home/mx007/projects/TalTechKursused/IAG0584/hw2/src/csv.c", "C", 66, 0, 8, 17, 91
+"/home/mx007/projects/TalTechKursused/IAG0584/hw2/src/database.c", "C", 219, 0, 46, 97, 362
+"/home/mx007/projects/TalTechKursused/IAG0584/hw2/src/fs.c", "C", 17, 0, 2, 9, 28
+"/home/mx007/projects/TalTechKursused/IAG0584/hw2/src/fs.h", "C++", 0, 1, 0, 2, 3
+"/home/mx007/projects/TalTechKursused/IAG0584/hw2/src/logging.c", "C", 0, 0, 0, 1, 1
+"/home/mx007/projects/TalTechKursused/IAG0584/hw2/src/main.c", "C", 0, 0, 0, 1, 1
+"/home/mx007/projects/TalTechKursused/IAG0584/hw2/src/memory.c", "C", 13, 0, 0, 6, 19
+"/home/mx007/projects/TalTechKursused/IAG0584/hw2/src/memory.h", "C++", 0, 3, 0, 1, 4
+"/home/mx007/projects/TalTechKursused/IAG0584/hw2/src/parsing.c", "C", 37, 0, 8, 11, 56
+"/home/mx007/projects/TalTechKursused/IAG0584/hw2/src/parsing.h", "C++", 0, 7, 0, 1, 8
+"/home/mx007/projects/TalTechKursused/IAG0584/hw2/src/string_utils.c", "C", 30, 0, 0, 9, 39
+"/home/mx007/projects/TalTechKursused/IAG0584/hw2/src/table.c", "C", 205, 0, 8, 73, 286
+"/home/mx007/projects/TalTechKursused/IAG0584/hw2/src/vector.c", "C", 162, 0, 2, 56, 220
+"Total", "-", 1491, 11, 121, 515, 2138

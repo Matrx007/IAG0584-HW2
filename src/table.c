@@ -199,6 +199,17 @@ void tableForEach(struct Table *table, void (*action)(void* data, void* args), v
     }
 }
 
+void tableRemoveIf(struct Table *table, uint8_t (*condition)(void* data, void* args), void* args) {
+
+    int limit = table->size;
+    for(int i = 0; i < limit; i++) {
+        if(condition(tableGet(table, i), args)) {
+            tableRemove(table, i);
+            limit = table->size;
+        }
+    }
+}
+
 void actionForEachElement(void* data, void* args) {
     int num = *(int*) data;
     if(num != 0) {

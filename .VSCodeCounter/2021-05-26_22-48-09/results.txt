@@ -1,0 +1,40 @@
+Date : 2021-05-26 22:48:09
+Directory : /home/mx007/projects/TalTechKursused/IAG0584/hw2/src
+Total : 15 files,  1502 codes, 121 comments, 515 blanks, all 2138 lines
+
+Languages
++----------+------------+------------+------------+------------+------------+
+| language | files      | code       | comment    | blank      | total      |
++----------+------------+------------+------------+------------+------------+
+| C        |         12 |      1,491 |        121 |        511 |      2,123 |
+| C++      |          3 |         11 |          0 |          4 |         15 |
++----------+------------+------------+------------+------------+------------+
+
+Directories
++---------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                | files      | code       | comment    | blank      | total      |
++---------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                   |         15 |      1,502 |        121 |        515 |      2,138 |
++---------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++---------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| filename                                                            | language | code       | comment    | blank      | total      |
++---------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| /home/mx007/projects/TalTechKursused/IAG0584/hw2/src/__database.c   | C        |        171 |         27 |         66 |        264 |
+| /home/mx007/projects/TalTechKursused/IAG0584/hw2/src/cli.c          | C        |        571 |         20 |        165 |        756 |
+| /home/mx007/projects/TalTechKursused/IAG0584/hw2/src/csv.c          | C        |         66 |          8 |         17 |         91 |
+| /home/mx007/projects/TalTechKursused/IAG0584/hw2/src/database.c     | C        |        219 |         46 |         97 |        362 |
+| /home/mx007/projects/TalTechKursused/IAG0584/hw2/src/fs.c           | C        |         17 |          2 |          9 |         28 |
+| /home/mx007/projects/TalTechKursused/IAG0584/hw2/src/fs.h           | C++      |          1 |          0 |          2 |          3 |
+| /home/mx007/projects/TalTechKursused/IAG0584/hw2/src/logging.c      | C        |          0 |          0 |          1 |          1 |
+| /home/mx007/projects/TalTechKursused/IAG0584/hw2/src/main.c         | C        |          0 |          0 |          1 |          1 |
+| /home/mx007/projects/TalTechKursused/IAG0584/hw2/src/memory.c       | C        |         13 |          0 |          6 |         19 |
+| /home/mx007/projects/TalTechKursused/IAG0584/hw2/src/memory.h       | C++      |          3 |          0 |          1 |          4 |
+| /home/mx007/projects/TalTechKursused/IAG0584/hw2/src/parsing.c      | C        |         37 |          8 |         11 |         56 |
+| /home/mx007/projects/TalTechKursused/IAG0584/hw2/src/parsing.h      | C++      |          7 |          0 |          1 |          8 |
+| /home/mx007/projects/TalTechKursused/IAG0584/hw2/src/string_utils.c | C        |         30 |          0 |          9 |         39 |
+| /home/mx007/projects/TalTechKursused/IAG0584/hw2/src/table.c        | C        |        205 |          8 |         73 |        286 |
+| /home/mx007/projects/TalTechKursused/IAG0584/hw2/src/vector.c       | C        |        162 |          2 |         56 |        220 |
+| Total                                                               |          |      1,502 |        121 |        515 |      2,138 |
++---------------------------------------------------------------------+----------+------------+------------+------------+------------+

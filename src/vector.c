@@ -148,11 +148,13 @@ int vectorCountMatches(struct Vector *vector, uint8_t (*matcher)(void* data, voi
     return matches;
 }
 
+void __freeReferences(void* data, void* args);
 void vectorForEach(struct Vector *vector, void (*action)(void* data, void* args), void* args) {
 
     int limit = vector->size;
     for(int i = 0; i < limit; i++) {
-        action(vectorGet(vector, i), args);
+        void* p = vectorGet(vector, i);
+        action(p, args);
         limit = vector->size;
     }
 }
@@ -171,6 +173,10 @@ void vectorRemoveIf(struct Vector *vector, uint8_t (*condition)(void* data, void
 void vectorClear(struct Vector *vector) {
     memset(vector->__data, 0, vector->size*vector->__unitSize);
     vector->size = 0;
+}
+
+void vectorDelete(struct Vector *vector) {
+    free(vector->__data);
 }
 
 int vector_test(int argc, char **args) {

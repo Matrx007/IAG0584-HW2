@@ -72,7 +72,10 @@ void __tableGrow(struct Table *table, int target) {
     table->__actualSize = target * table->__overheadRatio;
     
     // Reallocate new memory space
-    table->__data = realloc(table->__data, table->__actualSize * table->__unitSize);
+    if(table->__data == 0)
+        table->__data = malloc(table->__actualSize * table->__unitSize);
+    else 
+        table->__data = realloc(table->__data, table->__actualSize * table->__unitSize);
 
     if(table->__data == 0) {
         printf("Couldn't resize table\n");
@@ -88,11 +91,6 @@ void tablePack(struct Table *table) {
     table->__actualSize = table->size;
     
     table->__data = realloc(table->__data, table->__actualSize * table->__unitSize);
-
-    if(table->__data == 0) {
-        printf("Couldn't resize table\n");
-        abort();
-    }
 }
 
 int tableInsert(struct Table *table, int index, void *data) {
@@ -195,7 +193,8 @@ void tableForEach(struct Table *table, void (*action)(void* data, void* args), v
     if(table->size == 0) return;
 
     for(int i = 0; i < table->size; i++) {
-        action(tableGet(table, i), args);
+        void* p = tableGet(table, i);
+        action(p, args);
     }
 }
 
@@ -218,12 +217,16 @@ void actionForEachElement(void* data, void* args) {
 }
 
 void __freeReferences(void* data, void* args) {
-    free(data);
+    free(*(void**)data);
 }
 
 void tableClear(struct Table *table) {
     memset(table->__data, 0, table->size*table->__unitSize);
     table->size = 0;
+}
+
+void tableDelete(struct Table *table) {
+    free(table->__data);
 }
 
 uint8_t isNumber5(void* data, void* args) {

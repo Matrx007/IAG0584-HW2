@@ -37,6 +37,18 @@ struct DailyStatisticsRow {
     uint32_t dateEpoch;
 };
 
+void __freePowerPlantReference(void* data, void* args) {
+    printf("free-ing references of %p\n", data);
+    struct PowerPlantsRow* row = data;
+
+    free((void*)row->plantName);
+    free((void*)row->plantType);
+}
+
+void __freeDailyStatsReference(void* data, void* args) {
+    struct DailyStatisticsRow* row = data;
+}
+
 // ################################
 // ### POWER PLANT DATA PARSING ###
 // ################################

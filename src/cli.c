@@ -25,7 +25,7 @@ const char* promptFile(const char *question);
 // Vector<char*>
 struct Vector readWords();
 
-void executeCommand(struct State *state);
+u_int8_t executeCommand(struct State *state);
 
 void command_import(struct State *state, struct Vector *words);
 void command_export(struct State *state, struct Vector *words);
@@ -78,7 +78,8 @@ void printTable(struct Table *table) {
 }
 
 
-void executeCommand(struct State *state) {
+u_int8_t executeCommand(struct State *state) {
+    uint8_t ret = 1;
 
     // ### READ USER INPUT ###
 
@@ -86,30 +87,35 @@ void executeCommand(struct State *state) {
 
     struct Vector words = readWords();
 
-    if(words.size == 0) return;
-
-    char** firstWord = vectorGet(&words, 0);
-    if(!strcmp("EXIT", *firstWord)) {
-        flushAndExit();
-    } else if (!strcmp("IMPORT", *firstWord)) {
-        command_import(state, &words);
-    } else if (!strcmp("EXPORT", *firstWord)) {
-        command_export(state, &words);
-    } else if ((!strcmp("SELECT", *firstWord)) || (!strcmp("DESELECT", *firstWord))) {
-        command_selection(state, &words);
-    } else if (!strcmp("INSERT", *firstWord)) {
-        command_insert(state, &words);
-    } else if (!strcmp("DELETE", *firstWord)) {
-        command_delete(state, &words);
-    } else if (!strcmp("LOGS", *firstWord)) {
-        command_logs(state, &words);
-    } else if (!strcmp("PLANTS", *firstWord)) {
-        command_plants(state, &words);
-    } else if (!strcmp("LIST", *firstWord)) {
-        command_list(state, &words);
-    } else {
-        printf("Unknown command\n");
+    if(words.size != 0) {
+        char** firstWord = vectorGet(&words, 0);
+        if(!strcmp("EXIT", *firstWord)) {
+            ret = 0;
+        } else if (!strcmp("IMPORT", *firstWord)) {
+            command_import(state, &words);
+        } else if (!strcmp("EXPORT", *firstWord)) {
+            command_export(state, &words);
+        } else if ((!strcmp("SELECT", *firstWord)) || (!strcmp("DESELECT", *firstWord))) {
+            command_selection(state, &words);
+        } else if (!strcmp("INSERT", *firstWord)) {
+            command_insert(state, &words);
+        } else if (!strcmp("DELETE", *firstWord)) {
+            command_delete(state, &words);
+        } else if (!strcmp("LOGS", *firstWord)) {
+            command_logs(state, &words);
+        } else if (!strcmp("PLANTS", *firstWord)) {
+            command_plants(state, &words);
+        } else if (!strcmp("LIST", *firstWord)) {
+            command_list(state, &words);
+        } else {
+            printf("Unknown command\n");
+        }
     }
+
+    vectorForEach(&words, __freeReferences, 0);
+    vectorDelete(&words);
+
+    return ret;
 }
 
 
@@ -535,9 +541,10 @@ void __selectionMatcher_passthrough(void* data, void* args) {
 
 
 void flushAndExit(struct State *state) {
-    tableForEach(state->dailyStats,  __freeReferences, 0);
-    tableForEach(state->powerPlants, __freeReferences, 0);
-    // TODO: pack vectors & tables (maybe problems if vector/table is empty)
+    tableForEach(state->powerPlants, __freePowerPlantReference, 0);
+    tableForEach(state->dailyStats, __freeDailyStatsReference, 0);
+    tableDelete(state->powerPlants);
+    tableDelete(state->dailyStats);
 }
 
 
@@ -730,6 +737,17 @@ int main(int argc, char **args) {
     state.selectedDailyStats = &selectedLogs;
     
     while(1) {
-        executeCommand(&state);
+        if(!executeCommand(&state)) {
+            break;
+        }
     }
+
+
+    tableForEach(&plants, __freePowerPlantReference, 0);
+    tableForEach(&logs, __freeDailyStatsReference, 0);
+    tableDelete(&plants);
+    tableDelete(&logs);
+
+    vectorDelete(&selectedPlants);
+    vectorDelete(&selectedLogs);
 }

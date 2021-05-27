@@ -115,7 +115,6 @@ uint8_t __powerPlantIDMatcher(void* data, void* args) {
 uint8_t loadPowerPlantDatabaseFile(struct Table *powerPlants, const char *raw) {
     const char *c = raw;
 
-    int i = 0;
     int line = 0;
     do {
         line++;
@@ -261,7 +260,6 @@ uint8_t __dailyLogIDMatcher(void* data, void* args) {
 uint8_t loadDailyLogDatabaseFile(struct Table *dailyLogs, const char *raw) {
     const char *c = raw;
 
-    int i = 0;
     int line = 0;
     do {
         line++;

@@ -172,18 +172,18 @@ void command_select(struct State *state, struct Vector *words, void(*action)(voi
         return;
     }
 
-    char* matcherName;
-    char* matcherString;
+    char* matcherName = 0;
+    char* matcherString = 0;
     void (*matcher)(void*, void*);
     struct __MATCHER_DATA data;
-    enum FIELD field;
+    enum FIELD field = 0;
 
     // if "CONTAINS" or "EQUALS" not present
     if(words->size == 2) {
 
         matcher = __selectionMatcher_passthrough;
         
-        data = (struct __MATCHER_DATA){ SELECT, field, 0, action, dest };
+        data = (struct __MATCHER_DATA){ SELECT, 0, 0, action, dest };
 
         goto findMatches;
     } else if(words->size < 6) {
@@ -227,6 +227,7 @@ void command_select(struct State *state, struct Vector *words, void(*action)(voi
 
     findMatches:
 
+    if(field == 0 || matcherString == 0) printf("err: invalid parameters\n");
     data = (struct __MATCHER_DATA){ SELECT, field, matcherString, action, dest };
 
     tableForEach(source, matcher, &data);
@@ -378,7 +379,6 @@ void __selectionMatcherAction_deselect(void* data, void* args) {
 void __selectionMatcher_contains(void* data, void* args) {
     struct __MATCHER_DATA* mdata = args;
     struct PowerPlantsRow* plant = data;
-    struct DailyStatisticsRow* log = data;
     int callAction = 0;
 
     // works on both, power plants and logs, as the PK is the first elemnt in both structs
@@ -415,13 +415,11 @@ void __selectionMatcher_equals(void* data, void* args) {
     struct __MATCHER_DATA* mdata = args;
     struct PowerPlantsRow* plant = data;
     struct DailyStatisticsRow* log = data;
-    int callAction = 0;
 
     // works on both, power plants and logs, as the PK is the first element in both structs
     if(plant->plantID == 0) return; 
 
     enum DATA_TYPE type = STRING;
-    enum DATA_TYPE requiredType = STRING;
     float valFloat;
     uint64_t valInt;
     char* valString;
@@ -444,25 +442,6 @@ void __selectionMatcher_equals(void* data, void* args) {
         if(errno == 0) {
             type = INT;
         }
-    }
-
-    switch (mdata->field) {
-
-        case PLANT_PK:              requiredType = INT;     break;
-        case PLANT_NAME:            requiredType = STRING;  break;
-        case PLANT_TYPE:            requiredType = STRING;  break;
-        case PLANT_CAPACITY:        requiredType = FLOAT;   break;
-        case PLANT_PRODUCTION_COST: requiredType = FLOAT;   break;
-        case LOG_PK:                requiredType = INT;     break;
-        case LOG_FK:                requiredType = INT;     break;
-        case LOG_PRODUCTION:        requiredType = FLOAT;   break;
-        case LOG_SELL_PRICE:        requiredType = FLOAT;   break;
-        case LOG_DATE:              requiredType = INT;     break;
-        
-        default:
-            printf("fatal err: unknown column\n");
-            exit(EXIT_FAILURE);
-            return;
     }
 
     switch (mdata->field) {
@@ -684,7 +663,7 @@ int main(int argc, char **args) {
     }
 
 
-    int r = loadPowerPlantDatabaseFile(&plants, file);
+    loadPowerPlantDatabaseFile(&plants, file);
 
     free((char*)fileName);
     free(file);
@@ -721,7 +700,7 @@ int main(int argc, char **args) {
     }
 
 
-    r = loadDailyLogDatabaseFile(&logs, file);
+    loadDailyLogDatabaseFile(&logs, file);
 
     free((char*)fileName);
     free(file);
